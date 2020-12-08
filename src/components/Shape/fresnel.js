@@ -4,8 +4,8 @@ export const fresnel = {
     "mFresnelBias": { type: "f", value: 0.1 },
     "mFresnelPower": { type: "f", value: 2.0 },
     "mFresnelScale": { type: "f", value: 1.0 },
-    "time_r": { type: "f", value: 0 },
-    "time_g": { type: "f", value: 0 },
+    "time_r": { type: "f", value: 50.0 },
+    "time_g": { type: "f", value: 50.0 },
     "tCube": { type: "t", value: null }
   },
   fragmentShader:`
@@ -19,7 +19,7 @@ export const fresnel = {
 
     void main() {
       vec4 reflectedColor = vec4( 1.0, abs(sin(time_r * 1.0)), abs(sin(time_g * 1.0)), 1.0);
-      vec4 refractedColor = vec4( 1.0 );
+      vec4 refractedColor = vec4( 0.38, 0.38, 0.38, 1.0 );
 
       refractedColor.r = textureCube( tCube, vec3( -vRefract[0].x, vRefract[0].yz ) ).r;
       refractedColor.g = textureCube( tCube, vec3( -vRefract[1].x, vRefract[1].yz ) ).g;

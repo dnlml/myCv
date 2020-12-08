@@ -20,11 +20,17 @@ export const Contacts = () => {
   return (
     <LinkListStyles>
       <LinkItemStyles>
-        <a href="danielemeli.com">Github</a>
+        <a target="_blank" rel="noreferrer" href="https://github.com/dnlml">Github</a>
        </LinkItemStyles>
-      <LinkItemStyles> <a href="danielemeli.com">Mail</a> </LinkItemStyles>
-      <LinkItemStyles> <a href="danielemeli.com">Twitter</a> </LinkItemStyles>
-      <LinkItemStyles> <a href="danielemeli.com">Instagram</a> </LinkItemStyles>
+      <LinkItemStyles>
+        <a target="_blank" rel="noreferrer" href="&#109;&#97;&#105;&#108;&#116;&#111;&#58;&#100;&#97;&#110;&#105;&#101;&#108;&#101;&#109;&#101;&#108;&#105;&#56;&#54;&#64;&#103;&#109;&#97;&#105;&#108;&#46;&#99;&#111;&#109;">Mail</a>
+      </LinkItemStyles>
+      <LinkItemStyles>
+        <a target="_blank" rel="noreferrer" href="https://twitter.com/danielemeli">Twitter</a>
+      </LinkItemStyles>
+      <LinkItemStyles>
+        <a target="_blank" rel="noreferrer" href="https://www.instagram.com/danielemeli/">Instagram</a>
+      </LinkItemStyles>
     </LinkListStyles>
   )
 }

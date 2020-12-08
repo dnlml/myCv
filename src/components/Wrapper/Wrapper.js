@@ -1,5 +1,5 @@
+import { lazy, Suspense } from 'react';
 import styled from "styled-components"
-import { Shape } from "../Shape/Shape"
 import { Contacts } from "../Contacts/Contacts"
 
 const WrapperDiv = styled.div`
@@ -34,6 +34,24 @@ const SubTitleStyles = styled.p`
   letter-spacing: .3em;
 `;
 
+const LoadingStyles = styled.div`
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  height: 100%;
+  width: 100%;
+  font-family: 'Alata', sans-serif;
+  color: white;
+  background-color: #161616;
+  display: flex;
+  align-items:center;
+  justify-content:center;
+`;
+
+const Shape = lazy(() => import('../Shape/Shape').then(module => ({ default: module.Shape })));
+
+const renderLoader = () => <LoadingStyles><p>Loading...</p></LoadingStyles>;
+
 export const Wrapper = () => {
   return (
     <WrapperDiv>
@@ -44,7 +62,9 @@ export const Wrapper = () => {
         </div>
         <Contacts />
       </TitleStyles>
-      <Shape />
+      <Suspense fallback={renderLoader()}>
+        <Shape />
+      </Suspense>
     </WrapperDiv>
   )
 }
