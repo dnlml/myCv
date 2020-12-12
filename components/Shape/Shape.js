@@ -1,24 +1,21 @@
-import { useEffect, useReducer, useRef, useState } from "react";
+import { useEffect, useReducer, useRef, useState, useContext } from "react";
 import styled, { css } from "styled-components";
 import {
   SphereGeometry,
   Mesh,
-  Vector3,
   PerspectiveCamera,
   Scene,
   WebGLRenderer,
   HemisphereLight,
-  MeshLambertMaterial,
-  MeshStandardMaterial,
   PointLight,
-  Color,
-  CubeTextureLoader,
   UniformsUtils,
   ShaderMaterial
 } from "three";
 import { fresnel } from './fresnel';
 import { sceneReducer } from '../../state/Shape/sceneReducer';
 import { mouseReducer } from '../../state/Shape/mouseReducer';
+import { ContactContext } from '../../state/Contact/context/ContactContext';
+import { normalize } from '../../utils/normalize';
 
 const initialSceneState = {
   screenWidth: 0,
@@ -37,14 +34,6 @@ const initialMouseState = {
 };
 
 const initMesh = (scene, sceneDispatcher) => {
-  // const loader = new CubeTextureLoader();
-  // loader.setPath('/new3/');
-
-  // const textureCube = loader.load([
-  //   'danEtna.jpg', 'danEtna.jpg',
-  //   'danEtna.jpg', 'danEtna.jpg',
-  //   'danEtna.jpg', 'danEtna.jpg'
-  // ]);
   const { uniforms: fresnelUniform, fragmentShader, vertexShader } = fresnel;
 
   const uniforms = UniformsUtils.clone(fresnelUniform);
@@ -69,10 +58,6 @@ const initLight = (scene, sceneDispatcher) => {
   light.position.set(0,0,4);
   sceneDispatcher({ type: 'set_light', payload: { light } });
   scene.add(light);
-
-  // const sphereSize = 0.1;
-  // const pointLightHelper = new THREE.PointLightHelper( light, sphereSize, 0xff0000 );
-  // scene.add( pointLightHelper );
 };
 
 const floating = (time, mesh = false, scene, camera, renderer, requestRef) => {
@@ -99,6 +84,7 @@ const ShapeStyles = styled.div`
 `;
 
 export const Shape = () => {
+  const {dispatch: setContactColors} = useContext(ContactContext);
   const [visible, setVisible] = useState(false);
   const circleContainer = useRef(null);
   const [sceneState, sceneDispatcher] = useReducer(sceneReducer, initialSceneState);
@@ -106,8 +92,6 @@ export const Shape = () => {
   const { mesh, scene, camera, renderer, light } = sceneState;
   const { sx, sy } = mouseState;
   const requestRef = useRef();
-  const pos = useRef(new Vector3());
-  const mouse = useRef(new Vector3());
 
   useEffect(() => {
     const screenWidth = window.innerWidth;
@@ -123,28 +107,26 @@ export const Shape = () => {
     sceneDispatcher({ type: 'set_scene', payload: { scene }});
     sceneDispatcher({ type: 'set_renderer', payload: { renderer }});
 
-    circleContainer.current.appendChild(renderer.domElement);
-
-    document.addEventListener('mousemove', (e) => {
-      const { position } = camera;
-      mouse.current.set((e.clientX / screenWidth) * 2 - 1, - (e.clientY / screenHeight) * 2 + 1, 0.5);
-      mouse.current.unproject(camera);
-      mouse.current.sub(position).normalize();
-      const distance = - position.z / mouse.current.z;
-      pos.current.copy(position).add(mouse.current.multiplyScalar(distance));
-      mouseDispatcher({ type: 'set_sx', payload: { sx: pos.current.x } });
-      mouseDispatcher({ type: 'set_sy', payload: { sy: pos.current.y } });
-    });
-
     initMesh(scene, sceneDispatcher);
     initAmbLight(scene, sceneDispatcher);
     initLight(scene, sceneDispatcher);
 
     renderer.render(scene, camera);
 
+    circleContainer.current.appendChild(renderer.domElement);
+
     setTimeout(() => {
       setVisible(true);
     }, 1000);
+
+    document.addEventListener('mousemove', (e) => {
+      const x = normalize(e.clientX, 0, screenWidth, 0, Math.PI/2);
+      const y = normalize(e.clientY, 0, screenHeight, 0, Math.PI/2);
+      mouseDispatcher({ type: 'set_sx', payload: { sx: x } });
+      mouseDispatcher({ type: 'set_sy', payload: { sy: y } });
+      setContactColors({ type: 'set_g', payload: { g: Math.abs(Math.sin(x)) } });
+      setContactColors({ type: 'set_b', payload: { b: Math.abs(Math.sin(y)) } });
+    });
   }, []);
 
   useEffect(() => {
@@ -157,8 +139,9 @@ export const Shape = () => {
     light.position.y = sy;
 
     if (!mesh) return;
-    // console.log(mesh.material.color = new Color(1.0, Math.abs(Math.sin(sx/10 * 1.0)), Math.abs(Math.sin(sy/10 * 1.0)) ));
-
+    let { time_g, time_b } = mesh.material.uniforms;
+    time_g.value = sx;
+    time_b.value = sy;
     renderer.render(scene, camera);
 
   }, [mouseState]);

@@ -1,0 +1,1 @@
+export const normalize = (x, istart, istop, ostart, ostop) => ostart + (ostop - ostart) * ((x - istart) / (istop - istart));
