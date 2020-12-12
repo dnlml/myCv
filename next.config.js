@@ -1,3 +1,3 @@
 module.exports = {
-  basePath: '/new3',
+  basePath: '',
 }
