@@ -25,18 +25,37 @@ const TitleStyles = styled.div`
   grid-template-rows: 1fr;
   text-align: center;
 
+  div {
+    letter-spacing: .1em;
+
+    @media (max-width: 768px) {
+      position: relative;
+      top: -6.5vh;
+    }
+
+    @media (min-width: 768px) {
+      letter-spacing: .3em;
+    }
+  }
+
   h1 {
+    font-size: 20px;
     font-family: 'Alata', sans-serif;
-    font-size: 30px;
-    letter-spacing: .3em;
+
+    @media (min-width: 768px) {
+      font-size: 30px;
+    }
   }
 `;
 
 const SubTitleStyles = styled.p`
   font-family: sans-serif;
-  font-size: 11px;
+  font-size: 9px;
   padding-top: 4px;
-  letter-spacing: .3em;
+
+  @media (min-width: 768px) {
+    font-size: 11px;
+  }
 `;
 
 const Shape = dynamic(() => import('../Shape/Shape').then((mod) => mod.Shape), { ssr: false });

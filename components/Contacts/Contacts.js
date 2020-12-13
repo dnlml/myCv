@@ -9,7 +9,11 @@ const LinkListStyles = styled.ul`
   grid-template-rows: 0;
   grid-template-columns: auto auto auto auto;
   gap: 20px;
-  top: -10vh;
+  top: -20vh;
+
+  @media (min-width: 768px) {
+    top: -10vh;
+  }
 `;
 
 const LinkItemStyles = styled.li`
