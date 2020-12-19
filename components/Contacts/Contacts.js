@@ -52,9 +52,9 @@ const LinkItemStyles = styled.li`
 
 export const Contacts = () => {
   const { state: contactColors } = useContext(ContactContext);
-  const r = 255;
-  const g = normalize(contactColors.g, 0, 1, 0, 255);
-  const b = normalize(contactColors.b, 0, 1, 0, 255);
+  const r = normalize(contactColors.r, 0, 1, 0, 255);
+  const g = 0;
+  const b = 255;
 
   return (
     <LinkListStyles style={{ color: `rgb(${r}, ${g}, ${b})` }}>

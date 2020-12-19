@@ -8,14 +8,12 @@ import {
   WebGLRenderer,
   HemisphereLight,
   PointLight,
-  UniformsUtils,
-  ShaderMaterial
+  MeshLambertMaterial,
+  Vector3,
 } from "three";
-import { fresnel } from './fresnel';
 import { sceneReducer } from '../../state/Shape/sceneReducer';
 import { mouseReducer } from '../../state/Shape/mouseReducer';
 import { ContactContext } from '../../state/Contact/context/ContactContext';
-import { normalize } from '../../utils/normalize';
 
 const initialSceneState = {
   screenWidth: 0,
@@ -34,14 +32,9 @@ const initialMouseState = {
 };
 
 const initMesh = (scene, sceneDispatcher) => {
-  const { uniforms: fresnelUniform, fragmentShader, vertexShader } = fresnel;
-
-  const uniforms = UniformsUtils.clone(fresnelUniform);
-  const fresnelParams = { fragmentShader, vertexShader, uniforms };
-  const fresnelMaterial = new ShaderMaterial(fresnelParams);
-
+  const material = new MeshLambertMaterial({ color: 0x262626 });
   const geom = new SphereGeometry( 1, 256, 256 );
-  const mesh = new Mesh(geom, fresnelMaterial);
+  const mesh = new Mesh(geom, material);
   sceneDispatcher({type: 'set_mesh', payload: { mesh }});
   scene.add(mesh);
 }
@@ -49,7 +42,6 @@ const initMesh = (scene, sceneDispatcher) => {
 const initAmbLight = (scene, sceneDispatcher) => {
   const ambLight = new HemisphereLight(0xffffff, 1.0);
   sceneDispatcher({ type: 'set_amb_light', payload: { ambLight } });
-
   scene.add(ambLight);
 };
 
@@ -117,15 +109,30 @@ export const Shape = () => {
 
     setTimeout(() => {
       setVisible(true);
-    }, 1000);
+    }, 500);
 
     document.addEventListener('mousemove', (e) => {
-      const x = normalize(e.clientX, 0, screenWidth, 0, Math.PI/2);
-      const y = normalize(e.clientY, 0, screenHeight, 0, Math.PI/2);
+      const vector = new Vector3((e.clientX / screenWidth) * 2 - 1, - (e.clientY / screenHeight) * 2 + 1, 0.5);
+      const pos = new Vector3();
+
+      vector.unproject(camera);
+      vector.sub(camera.position).normalize();
+      const distance = - camera.position.z / vector.z;
+      pos.copy(camera.position).add(vector.multiplyScalar(distance));
+
+      const { x, y } = pos;
+
       mouseDispatcher({ type: 'set_sx', payload: { sx: x } });
       mouseDispatcher({ type: 'set_sy', payload: { sy: y } });
-      setContactColors({ type: 'set_g', payload: { g: Math.abs(Math.sin(x)) } });
-      setContactColors({ type: 'set_b', payload: { b: Math.abs(Math.sin(y)) } });
+      setContactColors({ type: 'set_r', payload: { r: Math.abs(Math.tanh(x*y)) } });
+    });
+
+    window.addEventListener('resize', () => {
+      const { innerWidth: width, innerHeight: height } = window;
+
+      camera.aspect = width / height;
+      camera.updateProjectionMatrix();
+      renderer.setSize(width, height);
     });
   }, []);
 
@@ -137,11 +144,8 @@ export const Shape = () => {
     if (!light) return;
     light.position.x = sx;
     light.position.y = sy;
+    light.color.r = Math.abs(Math.tanh(sx*sy));
 
-    if (!mesh) return;
-    let { time_g, time_b } = mesh.material.uniforms;
-    time_g.value = sx;
-    time_b.value = sy;
     renderer.render(scene, camera);
 
   }, [mouseState]);

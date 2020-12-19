@@ -1,19 +1,11 @@
 export const contactReducer = (state, action) => {
   switch (action.type) {
-    case 'set_g':
-      const { g } = action.payload;
+    case 'set_r':
+      const { r } = action.payload;
 
       return {
         ...state,
-        g
-      }
-
-    case 'set_b':
-      const { b } = action.payload;
-
-      return {
-        ...state,
-        b
+        r
       }
 
     default:
